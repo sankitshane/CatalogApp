@@ -29,39 +29,39 @@ APPLICATION_NAME = "Restaurant Menu Application"
 @app.route('/')
 @app.route('/catalog')
 def Catalog():
-    return "Main catalog page!"
+    return render_template('index.html')
 
 @app.route('/catalog/<int:id>')
 def Item_Catalog(id):
-    return "Item related to specific item"
+    return render_template('index.html')
 
 @app.route('/catalog/<int:id>/item/<int:categories_id>')
 def Item(id,categories_id):
-    return "Item description"
+    return render_template('item.html')
 
 @app.route('/catalog/new/')
 def newcategories():
-    return "Page where you enter new categories!"
+    return render_template('newcat.html')
 
 @app.route('/catalog/<int:id>/edit')
 def editcategories(id):
-    return "Page where you edit categories!"
+    return render_template('newcat.html')
 
 @app.route('/catalog/<int:id>/delete')
 def delcategories(id):
-    return "Page where you delete categories!"
+    return render_template('delete.html')
 
 @app.route('/catalog/<int:categories_id>/new/')
 def newItem(categories_id):
-    return "Page where you create new Items!"
+    return render_template('newcat.html')
 
 @app.route('/catalog/<int:categories_id>/edit/<int:id>')
 def editItem(categories_id,id):
-    return "Page where you edit Items!"
+    return render_template('newcat.html')
 
 @app.route('/catalog/<int:categories_id>/delete/<int:id>')
 def delItem(categories_id,id):
-    return "Page where you delete Items!"
+    return render_template('delete.html')
 
 if __name__ == '__main__':
     app.secret_key = 'super_secret_key'
