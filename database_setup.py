@@ -17,7 +17,7 @@ class Item(Base):
     id = Column(Integer, primary_key = True)
     name = Column(String(50), nullable = False)
     description = Column(String(50), nullable = False)
-    time = Column(DateTime, onupdate= datetime.datetime.now)
+    time = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     categories_id = Column(Integer, ForeignKey('categories.id'))
     catalog = relationship(Categories)
 
