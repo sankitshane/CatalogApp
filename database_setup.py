@@ -12,12 +12,12 @@ class Categories(Base):
     id = Column(Integer, primary_key = True)
     name = Column(String(50), nullable = False)
 
-class Item(Base):
+class CatItem(Base):
     __tablename__ = 'item'
     id = Column(Integer, primary_key = True)
     name = Column(String(50), nullable = False)
     description = Column(String(50), nullable = False)
-    time = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    time = Column(DateTime, default=datetime.datetime.now(), onupdate=datetime.datetime.now())
     categories_id = Column(Integer, ForeignKey('categories.id'))
     catalog = relationship(Categories)
 

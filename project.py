@@ -1,7 +1,7 @@
 from flask import Flask, render_template, request, redirect, jsonify, url_for, flash
 from sqlalchemy import create_engine, asc
 from sqlalchemy.orm import sessionmaker
-from database_setup import Base, Categories, Item
+from database_setup import Base, Categories, CatItem
 from flask import session as login_session
 import random
 import string
@@ -31,18 +31,18 @@ APPLICATION_NAME = "Restaurant Menu Application"
 @app.route('/catalog')
 def Catalog():
     categories = session.query(Categories).all()
-    item = session.query(Item).all()
-    return render_template('main.html', categories = categories, item = item)
+    items = session.query(CatItem).all()
+    return render_template('main.html', categories = categories, items = items)
 
 @app.route('/catalog/<int:id>')
 def Item_Catalog(id):
     categories = session.query(Categories).all()
-    item = session.query(Item).filter_by(categories_id = id).all()
-    return render_template('index.html', categories = categories, item = item)
+    items = session.query(CatItem).filter_by(categories_id = id).all()
+    return render_template('main.html', categories = categories, items = items)
 
 @app.route('/catalog/<int:categories_id>/item/<int:id>')
 def Item(id,categories_id):
-    item = session.query(Item).filter_by(id = id).one()
+    item = session.query(CatItem).filter_by(id = id).one()
     return render_template('item.html', item = item)
 
 @app.route('/catalog/new/', methods = ['GET','POST'])
@@ -53,7 +53,7 @@ def newcategories():
         session.commit()
         return redirect(url_for('Catalog'))
     else:
-        return render_template('newcat.html')
+        return render_template('newcat.html', type = "cat")
 
 @app.route('/catalog/<int:id>/edit', methods = ['GET','POST'])
 def editcategories(id):
@@ -62,7 +62,7 @@ def editcategories(id):
         editedcategory.name = request.form['name']
         return redirect(url_for('Catalog'))
     else:
-        return render_template('newcat.html', category = editedcategory)
+        return render_template('newcat.html', category = editedcategory, type = "cat")
 
 @app.route('/catalog/<int:id>/delete', methods = ['GET','POST'])
 def delcategories(id):
@@ -74,29 +74,32 @@ def delcategories(id):
     else:
         return render_template('delete.html', category = catelogtodelete)
 
-@app.route('/catalog/<int:categories_id>/new/', methods = ['GET','POST'])
-def newItem(categories_id):
+@app.route('/catalog/newitem/', methods = ['GET','POST'])
+def newItem():
+    categories = session.query(Categories).all()
     if request.method == 'POST':
         newitem = Item(name = request.form['name'], description = request.form['description'], categories_id = categories_id)
         session.add(newitem)
         session.commit()
         return redirect(url_for('Catalog'))
     else:
-        return render_template('newcat.html')
+        return render_template('newcat.html', categories = categories)
 
-@app.route('/catalog/<int:categories_id>/edit/<int:id>')
+@app.route('/catalog/<int:categories_id>/edit/<int:id>', methods = ['GET','POST'])
 def editItem(categories_id,id):
-    editeditem = session.query(Item).filter_by(id = id).one()
+    editeditem = session.query(CatItem).filter_by(id = id).one()
+    categories = session.query(Categories).all()
     if request.method == 'POST':
         editeditem.name = request.form['name']
         editeditem.description = request.form['description']
+        editeditem.categories_id
         return redirect(url_for('Catalog'))
     else:
-        return render_template('newcat.html', item = editeditem)
+        return render_template('newcat.html', item = editeditem, categories = categories)
 
 @app.route('/catalog/<int:categories_id>/delete/<int:id>')
 def delItem(categories_id,id):
-    itemtodelete = session.query(Item).filter_by(id = id).one()
+    itemtodelete = session.query(CatItem).filter_by(id = id).one()
     if request.method == 'POST':
         session.delete(itemtodelete)
         session.commit()
@@ -106,6 +109,5 @@ def delItem(categories_id,id):
 
 if __name__ == '__main__':
     app.secret_key = 'super_secret_key'
-
     app.debug = True
     app.run(host='0.0.0.0', port=5000)

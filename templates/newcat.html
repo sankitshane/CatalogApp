@@ -1,20 +1,50 @@
-<!DOCTYPE html>
-<html>
-  <head>
-    <meta charset="utf-8">
-    <title>New Category</title>
-  </head>
-  <body>
-    <h2>New Item</h2>
-    <p>Title:</p>
-    <input type="text" name="name">
-    <p>Description</p>
-    <textarea name="description" rows="8" cols="80"></textarea>
-    <p>Category</p>
-    <select class="" name="category">
-      <option value="1">1</option>
-      <option value="2">2</option>
-    </select>
-    <input type="submit">
-  </body>
-</html>
+{% extends "index.html" %}
+{% block content %}
+  {% if type == "cat" %}
+    <form action="#" method="post">
+      <h2>New Category</h2>
+      <p>Name:</p>
+      {% if category %}
+        <input type="text" name="name" value="{{ category.name }}">
+        <input type="submit" value="Update">
+      {% else %}
+      <input type="text" name="name">
+      <input type="submit">
+      {% endif %}
+    </form>
+  {% else %}
+    <form action="#" method="post">
+      {% if item %}
+        <h2>New Item</h2>
+        <p>Name:</p>
+        <input type="text" name="name" value="{{ item.name }}">
+        <p>Description</p>
+        <textarea name="description" rows="8" cols="80">{{ item.description}}</textarea>
+        <p>Category</p>
+        <select class="" name="category">
+          {% for category in categories %}
+            <option value="{{ category.name }}"
+            {% if item.categories_id == category.id %}
+              selected
+            {% endif %}
+            >{{ category.name }}</option>
+          {% endfor %}
+        </select>
+        <input type="submit">
+      {% else %}
+        <h2>New Item</h2>
+        <p>Name:</p>
+        <input type="text" name="name">
+        <p>Description</p>
+        <textarea name="description" rows="8" cols="80"></textarea>
+        <p>Category</p>
+        <select class="" name="category">
+          {% for category in categories %}
+            <option value="{{ category.name }}">{{ category.name }}</option>
+          {% endfor %}
+        </select>
+        <input type="submit">
+      {% endif %}
+    </form>
+  {% endif %}
+{% endblock %}
