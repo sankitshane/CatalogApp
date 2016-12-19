@@ -27,6 +27,25 @@ CLIENT_ID = json.loads(
 APPLICATION_NAME = "Restaurant Menu Application"
 '''
 
+
+# JSON APIs to view Restaurant Information
+@app.route('/catalog/JSON')
+def categoriesJSON():
+    categories = session.query(Categories).all()
+    return jsonify(categories=[c.serialize for c in categories])
+
+@app.route('/catalog/<int:categories_id>/items/JSON')
+def categoryitemJSON():
+    category = session.query(Categories).filter_by(id = categories_id).one()
+    items = session.query(CatItem).filter_by(categories_id = categories_id).all()
+    return jsonify(CatItems = [i.serialize for i in items])
+
+@app.route('catalog/<int:categories_id>/item/<int:id>/JSON')
+def itemJSON():
+    items = session.query(CatItems).filter_by(id = id).one()
+    return jsonify(CatItems = items.serialize)
+
+
 @app.route('/')
 @app.route('/catalog')
 def Catalog():
