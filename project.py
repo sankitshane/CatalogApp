@@ -1,7 +1,7 @@
 from flask import Flask, render_template, request, redirect, jsonify, url_for, flash
 from sqlalchemy import create_engine, asc
 from sqlalchemy.orm import sessionmaker
-from database_setup import Base, Categories, CatItem
+from database_setup import Base, Category, CItem, User
 from flask import session as login_session
 import random
 import string
@@ -22,9 +22,9 @@ Base.metadata.bind = engine
 DBSession = sessionmaker(bind=engine)
 session = DBSession()
 
-#CLIENT_ID = json.loads(
-#    open('client_secrets.json', 'r').read())['web']['client_id']
-#APPLICATION_NAME = "Catalog Application"
+CLIENT_ID = json.loads(
+    open('client_secrets.json', 'r').read())['web']['client_id']
+APPLICATION_NAME = "Catalog Application"
 
 # Create anti-forgery state token
 @app.route('/login')
@@ -110,6 +110,7 @@ def fbdisconnect():
     url = 'https://graph.facebook.com/%s/permissions?access_token=%s' % (facebook_id,access_token)
     h = httplib2.Http()
     result = h.request(url, 'DELETE')[1]
+    del login_session['username']
     return "you have been logged out"
 
 
@@ -237,6 +238,7 @@ def gdisconnect():
         response = make_response(
             json.dumps('Current user not connected.'), 401)
         response.headers['Content-Type'] = 'application/json'
+        del login_session['username']
         return response
     access_token = credentials.access_token
     url = 'https://accounts.google.com/o/oauth2/revoke?token=%s' % access_token
@@ -253,27 +255,30 @@ def gdisconnect():
 # JSON APIs to view Restaurant Information
 @app.route('/catalog/JSON')
 def categoriesJSON():
-    categories = session.query(Categories).all()
+    categories = session.query(Category).all()
     return jsonify(categories=[c.serialize for c in categories])
 
 @app.route('/catalog/<int:categories_id>/items/JSON')
 def categoryitemJSON():
-    category = session.query(Categories).filter_by(id = categories_id).one()
-    items = session.query(CatItem).filter_by(categories_id = categories_id).all()
+    category = session.query(Category).filter_by(id = categories_id).one()
+    items = session.query(CItem).filter_by(categories_id = categories_id).all()
     return jsonify(CatItems = [i.serialize for i in items])
 
 @app.route('/catalog/<int:categories_id>/item/<int:id>/JSON')
 def itemJSON():
-    items = session.query(CatItems).filter_by(id = id).one()
+    items = session.query(CItems).filter_by(id = id).one()
     return jsonify(CatItems = items.serialize)
 
 
 @app.route('/')
 @app.route('/catalog')
 def Catalog():
-    categories = session.query(Categories).all()
-    items = session.query(CatItem).all()
-    return render_template('main.html', categories = categories, items = items)
+    categories = session.query(Category).all()
+    items = session.query(CItem).all()
+    if 'username' not in login_session:
+        return render_template('main.html', categories = categories, items = items, login = "false")
+    else:
+        return render_template('main.html', categories = categories, items = items, login = "true")
 
 @app.route('/catalog/<int:id>')
 def Item_Catalog(id):
@@ -289,7 +294,7 @@ def Item(id,categories_id):
 @app.route('/catalog/new/', methods = ['GET','POST'])
 def newcategories():
     if request.method == 'POST':
-        newcategorie = Categories(name = request.form['name'])
+        newcategorie = Category(name = request.form['name'])
         session.add(newcategorie)
         session.commit()
         return redirect(url_for('Catalog'))
@@ -317,9 +322,9 @@ def delcategories(id):
 
 @app.route('/catalog/newitem/', methods = ['GET','POST'])
 def newItem():
-    categories = session.query(Categories).all()
+    categories = session.query(Category).all()
     if request.method == 'POST':
-        newitem = Item(name = request.form['name'], description = request.form['description'], categories_id = categories_id)
+        newitem = CItem(name = request.form['name'], description = request.form['description'], categories_id = categories_id)
         session.add(newitem)
         session.commit()
         return redirect(url_for('Catalog'))

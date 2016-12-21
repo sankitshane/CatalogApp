@@ -2,12 +2,18 @@
 {% block content %}
 <div class="cat">
   <h2>Categories</h2>
+  {% if login == "true" %}
+    <a href="{{url_for('newcategories')}}">Add Category</a>
+  {% endif %}
   {% for categorie in categories %}
     <li>{{categorie.name}}</li>
   {% endfor %}
 </div>
 <div class="cat">
   <h2>latest Items</h2>
+  {% if login == "true" %}
+    <a href="{{url_for('newItem')}}">Add Item</a>
+  {% endif %}
   {% for item in items %}
     <li>{{item.name}}</li>
   {% endfor %}
