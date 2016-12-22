@@ -280,39 +280,54 @@ def Catalog():
     else:
         return render_template('main.html', categories = categories, items = items, login = "true")
 
-@app.route('/catalog/<int:id>')
-def Item_Catalog(id):
-    categories = session.query(Categories).all()
-    items = session.query(CatItem).filter_by(categories_id = id).all()
+@app.route('/catalog/<string:name>/items')
+def Item_Catalog(name):
+    categories = session.query(Category).all()
+    cat_id = session.query(Category).filter_by(name = name).one()
+    items = session.query(CItem).filter_by(categories_id = cat_id.id).all()
     return render_template('main.html', categories = categories, items = items)
 
-@app.route('/catalog/<int:categories_id>/item/<int:id>')
-def Item(id,categories_id):
-    item = session.query(CatItem).filter_by(id = id).one()
-    return render_template('item.html', item = item)
+@app.route('/catalog/<string:name>/<string:i_name>')
+def Item(name,i_name):
+    item = session.query(CItem).filter_by(name = i_name).one()
+    if 'username' not in login_session:
+        return render_template('item.html', item = item, login = "false")
+    else:
+        return render_template('item.html', item = item, login = "true")
 
 @app.route('/catalog/new/', methods = ['GET','POST'])
 def newcategories():
+    if 'username' not in login_session:
+        return redirect('/login')
     if request.method == 'POST':
-        newcategorie = Category(name = request.form['name'])
+        newcategorie = Category(
+            name = request.form['name'],user_id = login_session['user_id'])
         session.add(newcategorie)
         session.commit()
         return redirect(url_for('Catalog'))
     else:
         return render_template('newcat.html', type = "cat")
 
-@app.route('/catalog/<int:id>/edit', methods = ['GET','POST'])
-def editcategories(id):
-    editedcategory = session.query(Categories).filter_by(id = id).one()
+@app.route('/catalog/<string:name>/editcategory', methods = ['GET','POST'])
+def editcategories(name):
+    editedcategory = session.query(Category).filter_by(name = name).one()
+    if 'username' not in login_session:
+        return redirect('/login')
+    if editedcategory.user_id != login_session['user_id']:
+        return "<script>function myFunction() {alert('You are not authorized to edit this restaurant. Please create your own restaurant in order to edit.');}</script><body onload='myFunction()''>"
     if request.method == 'POST':
         editedcategory.name = request.form['name']
         return redirect(url_for('Catalog'))
     else:
         return render_template('newcat.html', category = editedcategory, type = "cat")
 
-@app.route('/catalog/<int:id>/delete', methods = ['GET','POST'])
-def delcategories(id):
-    catelogtodelete = session.query(Categories).filter_by(id = id).one()
+@app.route('/catalog/<string:name>/deletecategory', methods = ['GET','POST'])
+def delcategories(name):
+    catelogtodelete = session.query(Category).filter_by(name = name).one()
+    if 'username' not in login_session:
+        return redirect('/login')
+    if catelogtodelete.user_id != login_session['user_id']:
+        return "<script>function myFunction() {alert('You are not authorized to delete this restaurant. Please create your own restaurant in order to delete.');}</script><body onload='myFunction()''>"
     if request.method == 'POST':
         session.delete(catelogtodelete)
         session.commit()
@@ -323,29 +338,40 @@ def delcategories(id):
 @app.route('/catalog/newitem/', methods = ['GET','POST'])
 def newItem():
     categories = session.query(Category).all()
+    if 'username' not in login_session:
+        return redirect('/login')
     if request.method == 'POST':
-        newitem = CItem(name = request.form['name'], description = request.form['description'], categories_id = categories_id)
+        cat_id = session.query(Category).filter_by(name = request.form['category']).one()
+        newitem = CItem(name = request.form['name'], description = request.form['description'], categories_id = cat_id.id, user_id = login_session['user_id'])
         session.add(newitem)
         session.commit()
         return redirect(url_for('Catalog'))
     else:
         return render_template('newcat.html', categories = categories)
 
-@app.route('/catalog/<int:categories_id>/edit/<int:id>', methods = ['GET','POST'])
-def editItem(categories_id,id):
-    editeditem = session.query(CatItem).filter_by(id = id).one()
-    categories = session.query(Categories).all()
+@app.route('/catalog/<string:name>/edit/', methods = ['GET','POST'])
+def editItem(name):
+    editeditem = session.query(CItem).filter_by(name = name).one()
+    categories = session.query(Category).all()
+    if 'username' not in login_session:
+        return redirect('/login')
+    if editeditemItem.user_id != login_session['user_id']:
+        return "<script>function myFunction() {alert('You are not authorized to edit this restaurant. Please create your own restaurant in order to edit.');}</script><body onload='myFunction()''>"
     if request.method == 'POST':
         editeditem.name = request.form['name']
         editeditem.description = request.form['description']
-        editeditem.categories_id
+        editeditem.categories_id = categories_id
         return redirect(url_for('Catalog'))
     else:
         return render_template('newcat.html', item = editeditem, categories = categories)
 
-@app.route('/catalog/<int:categories_id>/delete/<int:id>')
-def delItem(categories_id,id):
-    itemtodelete = session.query(CatItem).filter_by(id = id).one()
+@app.route('/catalog/<string:name>/delete')
+def delItem(name):
+    itemtodelete = session.query(CItem).filter_by(name = name).one()
+    if 'username' not in login_session:
+        return redirect('/login')
+    if itemtodelete.user_id != login_session['user_id']:
+        return "<script>function myFunction() {alert('You are not authorized to delete this restaurant. Please create your own restaurant in order to delete.');}</script><body onload='myFunction()''>"
     if request.method == 'POST':
         session.delete(itemtodelete)
         session.commit()

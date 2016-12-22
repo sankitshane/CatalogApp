@@ -6,7 +6,8 @@
     <a href="{{url_for('newcategories')}}">Add Category</a>
   {% endif %}
   {% for categorie in categories %}
-    <li>{{categorie.name}}</li>
+    <br>
+    <a href="{{url_for('Item_Catalog', name = categorie.name)}}">{{categorie.name}}</a>
   {% endfor %}
 </div>
 <div class="cat">
@@ -15,7 +16,11 @@
     <a href="{{url_for('newItem')}}">Add Item</a>
   {% endif %}
   {% for item in items %}
-    <li>{{item.name}}</li>
+    {% for categorie in categories %}
+      {% if categorie.id == item.categories_id %}
+        <a href="{{url_for('Item', name = categorie.name, i_name = item.name)}}">{{item.name}}</a>
+      {% endif %}
+    {% endfor %}
   {% endfor %}
 </div>
 {% endblock %}
