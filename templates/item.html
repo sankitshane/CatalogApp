@@ -7,8 +7,8 @@
 </div>
 {% if login == "true" %}
   <div class="edit/delete">
-    <a href="{{url_for('editItem')}}">edit</a>|
-    <a href="{{url_for('delItem')}}">delete</a>
+    <a href="{{url_for('editItem', name = item.name)}}">edit</a>|
+    <a href="{{url_for('delItem', name = item.name)}}">delete</a>
   </div>
 {% endif %}
 {% endblock%}
