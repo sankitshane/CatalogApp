@@ -110,9 +110,9 @@ def fbdisconnect():
     url = 'https://graph.facebook.com/%s/permissions?access_token=%s' % (facebook_id,access_token)
     h = httplib2.Http()
     result = h.request(url, 'DELETE')[1]
-    del login_session['username']
-    #return "you have been logged out"
-    return redirect('/catalog')
+    #del login_session['username']
+    return "you have been logged out"
+    #return redirect('/catalog')
 
 
 @app.route('/gconnect', methods=['POST'])
@@ -239,7 +239,7 @@ def gdisconnect():
         response = make_response(
             json.dumps('Current user not connected.'), 401)
         response.headers['Content-Type'] = 'application/json'
-        del login_session['username']
+        #del login_session['username']
         return response
     access_token = credentials.access_token
     url = 'https://accounts.google.com/o/oauth2/revoke?token=%s' % access_token
@@ -254,10 +254,24 @@ def gdisconnect():
 
 @app.route('/logout')
 def logout():
-    if login_session['provider'] == 'google':
-        return redirect('/gdisconnect')
+    if 'provider' in login_session:
+        if login_session['provider'] == 'google':
+            gdisconnect()
+            del login_session['gplus_id']
+            del login_session['credentials']
+        if login_session['provider'] == 'facebook':
+            fbdisconnect()
+            del login_session['facebook_id']
+        del login_session['username']
+        del login_session['email']
+        del login_session['picture']
+        del login_session['user_id']
+        del login_session['provider']
+        flash("You have successfully been logged out.")
+        return redirect(url_for('Catalog'))
     else:
-        return redirect('/fbdisconnect')
+        flash("You were not logged in")
+        return redirect(url_for('Catalog'))
 
 # JSON APIs to view Restaurant Information
 @app.route('/catalog/JSON')
