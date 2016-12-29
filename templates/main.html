@@ -1,26 +1,26 @@
 {% extends "index.html" %}
 {% block content %}
 <div class="con con1">
-  <h2><strong>Categories</strong></h2>
-  {% if login == "true" %}
+  <h3><strong>Categories</strong></h3>
+  <!--{% if login == "true" %}
     <a href="{{url_for('newcategories')}}">Add Category</a>
-  {% endif %}
+  {% endif %}-->
   <div class="con_content">
     {% for categorie in categories %}
       <br>
       <a href="{{url_for('Item_Catalog', name = categorie.name)}}">{{categorie.name}}</a>
-      {% if login == "true" %}
+      <!--{% if login == "true" %}
         <a href="{{url_for('editcategories', name = categorie.name)}}">+</a>
         <a href="{{url_for('delcategories', name = categorie.name)}}">x</a>
-      {% endif %}
+      {% endif %}-->
     {% endfor %}
   </div>
 </div>
 <div class="con con2">
   <h2><strong>latest Items</strong></h2>
-  {% if login == "true" %}
+  <!--{% if login == "true" %}
     <a href="{{url_for('newItem')}}">Add Item</a>
-  {% endif %}
+  {% endif %}-->
   <div class="con_content">
     {% for item in items %}
       {% for categorie in categories %}
@@ -31,5 +31,20 @@
       {% endfor %}
     {% endfor %}
   </div>
+</div>
+<div class="con con3">
+	<div class="login_display">
+		<h4><strong>Login</strong></h4>
+		<p>For Additional Functions</p>
+	</div>
+	<div class="buttons">
+    {% if login != "true" %}
+		  <a href=# class="btn btn1 btn-primary active" disabled="disabled">New Category</a>
+		  <a href=# class="btn btn-primary active" disabled="disabled">New Item</a>
+    {% else %}
+      <a href="{{url_for('newcategories')}}" class="btn btn1 btn-primary active">New Category</a>
+      <a href="{{url_for('newItem')}}" class="btn btn-primary active">New Item</a>
+    {% endif %}
+	</div>
 </div>
 {% endblock %}
