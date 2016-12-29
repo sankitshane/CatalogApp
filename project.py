@@ -280,7 +280,7 @@ def Catalog():
     if 'username' not in login_session:
         return render_template('main.html', categories = categories, items = items, login = "false")
     else:
-        return render_template('main.html', categories = categories, items = items, login = "true")
+        return render_template('main.html', categories = categories, items = items, info = login_session, login = "true")
 
 @app.route('/catalog/<string:name>/items')
 def Item_Catalog(name):

@@ -2,9 +2,6 @@
 {% block content %}
 <div class="con con1">
   <h3><strong>Categories</strong></h3>
-  <!--{% if login == "true" %}
-    <a href="{{url_for('newcategories')}}">Add Category</a>
-  {% endif %}-->
   <div class="con_content">
     {% for categorie in categories %}
       <br>
@@ -18,9 +15,6 @@
 </div>
 <div class="con con2">
   <h2><strong>latest Items</strong></h2>
-  <!--{% if login == "true" %}
-    <a href="{{url_for('newItem')}}">Add Item</a>
-  {% endif %}-->
   <div class="con_content">
     {% for item in items %}
       {% for categorie in categories %}
@@ -33,10 +27,17 @@
   </div>
 </div>
 <div class="con con3">
-	<div class="login_display">
-		<h4><strong>Login</strong></h4>
-		<p>For Additional Functions</p>
-	</div>
+  {% if login != "true" %}
+	 <div class="login_display" style="padding-top: 25%;">
+	    <h4><strong>Login</strong></h4>
+		  <p>For Additional Functions</p>
+    </div>
+  {% else %}
+    <div class="login_display" style="padding-top: 10%;">
+      <img src="{{info['picture']}}">
+      <h3><strong>{{ info['username'] }}</strong></h3>
+    </div>
+    {% endif %}
 	<div class="buttons">
     {% if login != "true" %}
 		  <a href=# class="btn btn1 btn-primary active" disabled="disabled">New Category</a>
