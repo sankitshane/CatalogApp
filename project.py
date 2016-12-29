@@ -202,6 +202,8 @@ def gconnect():
     output += ' " style = "width: 300px; height: 300px;border-radius: 150px;-webkit-border-radius: 150px;-moz-border-radius: 150px;"> '
     flash("you are now logged in as %s" % login_session['username'])
     print "done!"
+
+    print login_session
     return output
 
 # User Helper Functions
@@ -408,7 +410,6 @@ def disconnect():
         if login_session['provider'] == 'google':
             gdisconnect()
             del login_session['gplus_id']
-            del login_session['credentials']
         if login_session['provider'] == 'facebook':
             fbdisconnect()
             del login_session['facebook_id']
@@ -417,11 +418,14 @@ def disconnect():
         del login_session['picture']
         del login_session['user_id']
         del login_session['provider']
+        del login_session['_flashes']
         flash("You have successfully been logged out.")
-        return redirect(url_for('catalog'))
+        print login_session
+        return redirect(url_for('Catalog'))
+
     else:
         flash("You were not logged in")
-        return redirect(url_for('catalog'))
+        return redirect(url_for('Catalog'))
 
 if __name__ == '__main__':
     app.secret_key = 'super_secret_key'
