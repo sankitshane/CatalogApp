@@ -209,3 +209,24 @@ input:focus ~ .highlight {
   right: 470px;
   top: 310px;
 }
+
+.log {
+  display: inline-block;
+  margin: 10px;
+}
+
+#result {
+  margin: 0;
+  position: absolute;
+  top: 40%;
+  left: 40%;
+}
+
+.log1 {
+  width: 200px;
+  height: 100px;
+  margin: 0;
+  position: absolute;
+  top: 40%;
+  left: 20%;
+}
