@@ -2,49 +2,73 @@
 {% block content %}
   {% if type == "cat" %}
     <form action="#" method="post">
-      <h2>New Category</h2>
-      <p>Name:</p>
-      {% if category %}
-        <input type="text" name="name" value="{{ category.name }}">
-        <input type="submit" value="Update">
-      {% else %}
-      <input type="text" name="name">
-      <input type="submit">
-      {% endif %}
+      <div>
+        <h2><strong>New Category</strong></h2>
+        <br>
+        {% if category %}
+          <div class="group">
+            <input type="text" name = "name" value="{{ category.name }}" required>
+            <span class="highlight"></span>
+            <span class="bar"></span>
+            <label>Name</label>
+          </div>
+          <input type="submit" value="Update" class="btn btn-default">
+        {% else %}
+          <div class="group">
+            <input type="text" name = "name" required>
+            <span class="highlight"></span>
+            <span class="bar"></span>
+            <label>Name</label>
+          </div>
+          <input type="submit" class="btn btn-default">
+        {% endif %}
+      </div>
     </form>
   {% else %}
     <form action="#" method="post">
-      {% if item %}
-        <h2>New Item</h2>
-        <p>Name:</p>
-        <input type="text" name="name" value="{{ item.name }}">
-        <p>Description</p>
-        <textarea name="description" rows="8" cols="80">{{ item.description}}</textarea>
-        <p>Category</p>
-        <select class="" name="category">
-          {% for category in categories %}
-            <option value="{{ category.name }}"
-            {% if item.categories_id == category.id %}
-              selected
-            {% endif %}
-            >{{ category.name }}</option>
-          {% endfor %}
-        </select>
-        <input type="submit"value="Update">
-      {% else %}
-        <h2>New Item</h2>
-        <p>Name:</p>
-        <input type="text" name="name">
-        <p>Description</p>
-        <textarea name="description" rows="8" cols="80"></textarea>
-        <p>Category</p>
-        <select class="" name="category">
-          {% for category in categories %}
-            <option value="{{ category.name }}">{{ category.name }}</option>
-          {% endfor %}
-        </select>
-        <input type="submit">
-      {% endif %}
+      <div>
+        {% if item %}
+          <h2><strong>New Item</strong></h2>
+          <br>
+          <div class="group">
+            <input type="text" name="name" value="{{ item.name }}" required>
+            <span class="highlight"></span>
+            <span class="bar"></span>
+            <label>Name</label>
+          </div>
+          <h4><strong>Description</strong></h4>
+          <textarea name="description" rows="6" cols="50">{{ item.description}}</textarea>
+          <h4 id="cat"><strong>Category</strong></h4>
+          <select class="opt" name="category">
+            {% for category in categories %}
+              <option value="{{ category.name }}"
+              {% if item.categories_id == category.id %}
+                selected
+              {% endif %}
+              >{{ category.name }}</option>
+            {% endfor %}
+          </select>
+          <input type="submit"value="Update" class="btn btn-default ibtn">
+        {% else %}
+          <h2><strong>New Item</strong></h2>
+          <br>
+          <div class="group">
+            <input type="text" name="name" required>
+            <span class="highlight"></span>
+            <span class="bar"></span>
+            <label>Name</label>
+          </div>
+          <h4><strong>Description</strong></h4>
+          <textarea name="description" rows="6" cols="50">{{ item.description}}</textarea>
+          <h4 id="cat"><strong>Category</strong></h4>
+          <select class="opt" name="category">
+            {% for category in categories %}
+              <option value="{{ category.name }}">{{ category.name }}</option>
+            {% endfor %}
+          </select>
+          <input type="submit" class="btn btn-default ibtn">
+        {% endif %}
+      </div>
     </form>
   {% endif %}
 {% endblock %}
