@@ -26,18 +26,24 @@ CLIENT_ID = json.loads(
     open('client_secrets.json', 'r').read())['web']['client_id']
 APPLICATION_NAME = "Catalog Application"
 
+
 # Create anti-forgery state token
 @app.route('/login')
 def showLogin():
+    """
+    Creates a random generated number and sets it as state.
+    """
     state = ''.join(random.choice(string.ascii_uppercase + string.digits)
                     for x in xrange(32))
     login_session['state'] = state
-    # return "The current session state is %s" % login_session['state']
     return render_template('login.html', STATE=state)
 
 
 @app.route('/fbconnect', methods=['POST'])
 def fbconnect():
+    """
+    Code to validate, fetch and use data from Facebook Oauth
+    """
     if request.args.get('state') != login_session['state']:
         response = make_response(json.dumps('Invalid state parameter.'), 401)
         response.headers['Content-Type'] = 'application/json'
@@ -58,7 +64,6 @@ def fbconnect():
     userinfo_url = "https://graph.facebook.com/v2.8/me"
     # strip expire tag from access token
     token = result.split("&")[0]
-
 
     url = 'https://graph.facebook.com/v2.8/me?%s&fields=name,id,email' % token
     h = httplib2.Http()
@@ -104,10 +109,13 @@ def fbconnect():
 
 @app.route('/fbdisconnect')
 def fbdisconnect():
+    """
+    To Delete data from Facebook
+    """
     facebook_id = login_session['facebook_id']
     # The access token must me included to successfully logout
     access_token = login_session['access_token']
-    url = 'https://graph.facebook.com/%s/permissions?access_token=%s' % (facebook_id,access_token)
+    url = 'https://graph.facebook.com/%s/permissions?access_token=%s' % (facebook_id, access_token)
     h = httplib2.Http()
     result = h.request(url, 'DELETE')[1]
     return "you have been logged out"
@@ -115,6 +123,9 @@ def fbdisconnect():
 
 @app.route('/gconnect', methods=['POST'])
 def gconnect():
+    """
+    Code to validate, fetch and use data from Google Oauth
+    """
     # Validate state token
     if request.args.get('state') != login_session['state']:
         response = make_response(json.dumps('Invalid state parameter.'), 401)
@@ -206,9 +217,8 @@ def gconnect():
     print login_session
     return output
 
+
 # User Helper Functions
-
-
 def createUser(login_session):
     newUser = User(name=login_session['username'], email=login_session[
                    'email'], picture=login_session['picture'])
@@ -230,11 +240,13 @@ def getUserID(email):
     except:
         return None
 
+
 # DISCONNECT - Revoke a current user's token and reset their login_session
-
-
 @app.route('/gdisconnect')
 def gdisconnect():
+    """
+    To Delete data from Google
+    """
     # Only disconnect a connected user.
     credentials = login_session.get('credentials')
     if credentials is None:
@@ -254,7 +266,7 @@ def gdisconnect():
         return response
 
 
-# JSON APIs to view Restaurant Information
+# JSON APIs to view Catalog Information
 @app.route('/catalog.json')
 def categoriesJSON():
     categories = session.query(Category).all()
@@ -268,130 +280,139 @@ def Catalog():
     categories = session.query(Category).all()
     items = session.query(CItem).all()
     if 'username' not in login_session:
-        return render_template('main.html', categories = categories, items = items, login = "false")
+        return render_template('main.html', categories=categories, items=items, login="false")
     else:
-        return render_template('main.html', categories = categories, items = items, info = login_session, login = "true")
+        return render_template('main.html', categories=categories, items=items, info=login_session, login="true")
+
 
 @app.route('/catalog/<string:name>/items')
 def Item_Catalog(name):
     categories = session.query(Category).all()
-    cat_id = session.query(Category).filter_by(name = name).one()
-    items = session.query(CItem).filter_by(categories_id = cat_id.id).all()
+    cat_id = session.query(Category).filter_by(name=name).one()
+    items = session.query(CItem).filter_by(categories_id=cat_id.id).all()
     if 'username' not in login_session:
-        return render_template('main.html', categories = categories, items = items, login = "false")
+        return render_template('main.html', categories=categories, items=items, login="false")
     else:
-        return render_template('main.html', categories = categories, items = items,info = login_session, login = "true")
+        return render_template('main.html', categories=categories, items=items, info=login_session, login="true")
+
 
 @app.route('/catalog/<string:name>/<string:i_name>')
-def Item(name,i_name):
-    item = session.query(CItem).filter_by(name = i_name).one()
+def Item(name, i_name):
+    item = session.query(CItem).filter_by(name=i_name).one()
     if 'username' not in login_session:
-        return render_template('item.html', item = item, login = "false")
+        return render_template('item.html', item=item, login="false")
     else:
-        return render_template('item.html', item = item, login = "true")
+        return render_template('item.html', item=item, login="true")
 
-@app.route('/catalog/new/', methods = ['GET','POST'])
+
+@app.route('/catalog/new/', methods=['GET', 'POST'])
 def newcategories():
     if 'username' not in login_session:
         return redirect('/login')
     if request.method == 'POST':
         newcategorie = Category(
-            name = request.form['name'],user_id = login_session['user_id'])
+            name=request.form['name'], user_id=login_session['user_id'])
         session.add(newcategorie)
         session.commit()
         return redirect(url_for('Catalog'))
     else:
         if 'username' not in login_session:
-            return render_template('newcat.html', type = "cat", login = "false")
+            return render_template('newcat.html', type="cat", login="false")
         else:
-            return render_template('newcat.html', type = "cat", login = "true")
+            return render_template('newcat.html', type="cat", login="true")
 
-@app.route('/catalog/<string:name>/editcategory', methods = ['GET','POST'])
+
+@app.route('/catalog/<string:name>/editcategory', methods=['GET', 'POST'])
 def editcategories(name):
-    editedcategory = session.query(Category).filter_by(name = name).one()
+    editedcategory = session.query(Category).filter_by(name=name).one()
     if 'username' not in login_session:
         return redirect('/login')
     if editedcategory.user_id != login_session['user_id']:
-        return "<script>function myFunction() {alert('You are not authorized to edit this restaurant. Please create your own restaurant in order to edit.');}</script><body onload='myFunction()''>"
+        return "<script>function myFunction() {alert('You are not authorized to edit this Catalog. Please create your own Catalog in order to edit.');}</script><body onload='myFunction()''>"
     if request.method == 'POST':
         editedcategory.name = request.form['name']
         return redirect(url_for('Catalog'))
     else:
         if 'username' not in login_session:
-            return render_template('newcat.html', category = editedcategory, type = "cat", login = "false")
+            return render_template('newcat.html', category=editedcategory, type="cat", login="false")
         else:
-            return render_template('newcat.html', category = editedcategory, type = "cat", login = "true")
+            return render_template('newcat.html', category=editedcategory, type="cat", login="true")
 
-@app.route('/catalog/<string:name>/deletecategory', methods = ['GET','POST'])
+
+@app.route('/catalog/<string:name>/deletecategory', methods=['GET', 'POST'])
 def delcategories(name):
-    catelogtodelete = session.query(Category).filter_by(name = name).one()
+    catelogtodelete = session.query(Category).filter_by(name=name).one()
     if 'username' not in login_session:
         return redirect('/login')
     if catelogtodelete.user_id != login_session['user_id']:
-        return "<script>function myFunction() {alert('You are not authorized to delete this restaurant. Please create your own restaurant in order to delete.');}</script><body onload='myFunction()''>"
+        return "<script>function myFunction() {alert('You are not authorized to delete this Catalog. Please create your own Catalog in order to delete.');}</script><body onload='myFunction()''>"
     if request.method == 'POST':
         session.delete(catelogtodelete)
         session.commit()
         return redirect(url_for('Catalog'))
     else:
         if 'username' not in login_session:
-            return render_template('delete.html', category = catelogtodelete, login = "false")
+            return render_template('delete.html', category=catelogtodelete, login="false")
         else:
-            return render_template('delete.html', category = catelogtodelete, login = "true")
+            return render_template('delete.html', category=catelogtodelete, login="true")
 
-@app.route('/catalog/newitem/', methods = ['GET','POST'])
+
+@app.route('/catalog/newitem/', methods=['GET', 'POST'])
 def newItem():
     categories = session.query(Category).all()
     if 'username' not in login_session:
         return redirect('/login')
     if request.method == 'POST':
-        cat_id = session.query(Category).filter_by(name = request.form['category']).one()
-        newitem = CItem(name = request.form['name'], description = request.form['description'], categories_id = cat_id.id, user_id = login_session['user_id'])
+        cat_id = session.query(Category).filter_by(name=request.form['category']).one()
+        newitem = CItem(name=request.form['name'], description=request.form['description'], categories_id=cat_id.id, user_id=login_session['user_id'])
         session.add(newitem)
         session.commit()
         return redirect(url_for('Catalog'))
     else:
         if 'username' not in login_session:
-            return render_template('newcat.html', categories = categories, login="false")
+            return render_template('newcat.html', categories=categories, login="false")
         else:
-            return render_template('newcat.html', categories = categories, login="true")
+            return render_template('newcat.html', categories=categories, login="true")
 
-@app.route('/catalog/<string:name>/edit/', methods = ['GET','POST'])
+
+@app.route('/catalog/<string:name>/edit/', methods=['GET', 'POST'])
 def editItem(name):
-    editeditem = session.query(CItem).filter_by(name = name).one()
+    editeditem = session.query(CItem).filter_by(name=name).one()
     categories = session.query(Category).all()
     if 'username' not in login_session:
         return redirect('/login')
     if editeditem.user_id != login_session['user_id']:
-        return "<script>function myFunction() {alert('You are not authorized to edit this restaurant. Please create your own restaurant in order to edit.');}</script><body onload='myFunction()''>"
+        return "<script>function myFunction() {alert('You are not authorized to edit this Catalog. Please create your own Catalog in order to edit.');}</script><body onload='myFunction()''>"
     if request.method == 'POST':
         editeditem.name = request.form['name']
         editeditem.description = request.form['description']
-        cat = session.query(Category).filter_by(name = request.form['category']).one()
+        cat = session.query(Category).filter_by(name=request.form['category']).one()
         editeditem.categories_id = cat.id
         return redirect(url_for('Catalog'))
     else:
         if 'username' not in login_session:
-            return render_template('newcat.html', item = editeditem, categories = categories, login="false")
+            return render_template('newcat.html', item=editeditem, categories=categories, login="false")
         else:
-            return render_template('newcat.html', item = editeditem, categories = categories, login="true")
+            return render_template('newcat.html', item=editeditem, categories=categories, login="true")
+
 
 @app.route('/catalog/<string:name>/delete')
 def delItem(name):
-    itemtodelete = session.query(CItem).filter_by(name = name).one()
+    itemtodelete = session.query(CItem).filter_by(name=name).one()
     if 'username' not in login_session:
         return redirect('/login')
     if itemtodelete.user_id != login_session['user_id']:
-        return "<script>function myFunction() {alert('You are not authorized to delete this restaurant. Please create your own restaurant in order to delete.');}</script><body onload='myFunction()''>"
+        return "<script>function myFunction() {alert('You are not authorized to delete this Catalog. Please create your own Catalog in order to delete.');}</script><body onload='myFunction()''>"
     if request.method == 'POST':
         session.delete(itemtodelete)
         session.commit()
         return redirect(url_for('Catalog'))
     else:
         if 'username' not in login_session:
-            return render_template('delete.html', category = itemtodelete, login="false")
+            return render_template('delete.html', category=itemtodelete, login="false")
         else:
-            return render_template('delete.html', category = itemtodelete, login="true")
+            return render_template('delete.html', category=itemtodelete, login="true")
+
 
 # Disconnect based on provider
 @app.route('/disconnect')
