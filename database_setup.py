@@ -1,10 +1,15 @@
 from sqlalchemy import Column, ForeignKey, Integer, String, DateTime
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import relationship, sessionmaker
 from sqlalchemy import create_engine
 import datetime
-
 Base = declarative_base()
+engine = create_engine('sqlite:///catalogmenu.db')
+Base.metadata.bind = engine
+
+DBSession = sessionmaker(bind=engine)
+session = DBSession()
+
 
 class User(Base):
     __tablename__ = 'user'
@@ -23,10 +28,12 @@ class Category(Base):
 
     @property
     def serialize(self):
+        item = session.query(CItem).filter_by(categories_id = self.id).all()
         """Return object data in easily serializeable format"""
         return {
             'name': self.name,
             'id': self.id,
+            'item': [i.serialize for i in item],
         }
 
 
@@ -49,7 +56,6 @@ class CItem(Base):
             'description': self.description,
             'id': self.id,
             'category ID': self.categories_id,
-            'created/updated time': self.time,
         }
 
 
