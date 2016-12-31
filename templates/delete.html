@@ -1,7 +1,9 @@
 {% extends "index.html" %}
 {% block content %}
-  <div class="item">
-    <p>Are you sure you want to delete <strong> {{ category.name }}</strong>?</p>
-    <input type="submit" value="yes">
-  </div>
+  <form action="#" method="post">
+    <div class="item">
+      <p>Are you sure you want to delete <strong> {{ category.name }}</strong>?</p>
+      <input type="submit" value="yes" class="btn btn-default">
+    </div>
+  </form>
 {% endblock %}

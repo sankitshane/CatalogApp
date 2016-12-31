@@ -18,5 +18,6 @@ It's a application uses RESTful arc. to show different products
 4. Type: $ vagrant ssh
    To login into a secure shell
 5. go to vagrant directory and execute
-   python project.py
+   $ python database_setup.py (To setup the tables)
+   $ python project.py (To execute the local server)
 6. go to [link](http://localhost:5000/catalog)

@@ -6,10 +6,10 @@
     {% for categorie in categories %}
       <br>
       <a href="{{url_for('Item_Catalog', name = categorie.name)}}">{{categorie.name}}</a>
-      <!--{% if login == "true" %}
-        <a href="{{url_for('editcategories', name = categorie.name)}}">+</a>
-        <a href="{{url_for('delcategories', name = categorie.name)}}">x</a>
-      {% endif %}-->
+      {% if login == "true" %}
+        <a href="{{url_for('delcategories', name = categorie.name)}}"><span class="glyphicon glyphicon-trash"></span></a>
+        <a href="{{url_for('editcategories', name = categorie.name)}}"><span class="glyphicon glyphicon-pencil"></span></a>
+      {% endif %}
     {% endfor %}
   </div>
 </div>
